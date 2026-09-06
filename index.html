@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>나는 어떤 눈으로 이야기를 보ㄹ까?</title>
+<meta name="description" content="2주차 수업용 이야기 성향 테스트">
+<style>
+  :root{
+    --paper:#FBFBFB;
+    --box:#F0F0F0;
+    --ink:#000000;
+    --red:#D0000E;
+    --mute:#555555;
+    --line:#DCDCDC;
+    --wrap:34rem;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",sans-serif;
+    font-size:17px;
+    line-height:1.62;
+    -webkit-text-size-adjust:100%;
+  }
+  .shell{
+    max-width:var(--wrap);
+    margin:0 auto;
+    padding:1.6rem 1.25rem 3rem;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+  }
+  .masthead{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1.5px solid var(--ink);
+    padding-bottom:.5rem;margin-bottom:1.6rem;
+    font-size:.72rem;font-weight:700;letter-spacing:.06em;
+  }
+  .masthead .right{color:var(--mute);font-weight:600}
+
+  /* ── 진행 눈금 ─────────────────────────── */
+  .ticks{display:flex;gap:3px;margin-bottom:.55rem}
+  .ticks i{flex:1;height:3px;background:var(--line);display:block}
+  .ticks i.on{background:var(--ink)}
+  .ticks i.now{background:var(--red)}
+  .count{font-size:.75rem;color:var(--mute);margin-bottom:1.9rem;font-weight:600}
+
+  h1{
+    font-size:2.05rem;line-height:1.24;font-weight:800;
+    letter-spacing:-.02em;margin:.2rem 0 .8rem;
+  }
+  .sub{color:var(--mute);font-size:.95rem;margin-bottom:2rem}
+
+  /* ── 문항 ─────────────────────────────── */
+  .setup{font-size:1.06rem;margin:0 0 1.15rem}
+  .quotes{margin:0 0 1.3rem}
+  .quotes p{
+    background:var(--box);
+    margin:0 0 .5rem;padding:.85rem 1rem;
+    font-size:1rem;line-height:1.55;
+  }
+  .quotes p b{color:var(--red);margin-right:.5rem;font-weight:800}
+  .ask{font-weight:800;font-size:1.1rem;margin:0 0 1.05rem}
+
+  .opts{display:flex;flex-direction:column;gap:.6rem}
+  button.opt{
+    font:inherit;text-align:left;width:100%;
+    background:var(--paper);color:var(--ink);
+    border:1.5px solid var(--ink);
+    padding:1rem 1.05rem;
+    line-height:1.5;cursor:pointer;
+  }
+  button.opt:hover{background:var(--box)}
+  button.opt[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  button.opt:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+  /* ── 입력 ─────────────────────────────── */
+  label.fld{display:block;font-weight:700;font-size:.95rem;margin-bottom:.5rem}
+  input[type=text]{
+    font:inherit;width:100%;padding:.9rem 1rem;
+    border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
+    border-radius:0;
+  }
+  input[type=text]:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+  .hint{font-size:.85rem;color:var(--mute);margin-top:.55rem}
+  .warn{font-size:.85rem;color:var(--red);font-weight:700;margin-top:.55rem;display:none}
+  .warn.show{display:block}
+
+  /* ── 버튼 ─────────────────────────────── */
+  .row{display:flex;gap:.6rem;margin-top:1.6rem;align-items:center}
+  button.go{
+    font:inherit;font-weight:800;cursor:pointer;
+    background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);
+    padding:.95rem 1.6rem;
+  }
+  button.go:hover{background:var(--red);border-color:var(--red)}
+  button.back{
+    font:inherit;font-weight:700;cursor:pointer;
+    background:none;color:var(--mute);border:1.5px solid var(--line);
+    padding:.95rem 1.25rem;
+  }
+  button.back:hover{color:var(--ink);border-color:var(--ink)}
+  button.go:focus-visible,button.back:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+  /* ── 결과 ─────────────────────────────── */
+  .card{border:1.5px solid var(--ink);padding:1.5rem 1.25rem;margin-bottom:1.4rem}
+  .who{font-size:.78rem;font-weight:700;color:var(--red);letter-spacing:.05em;margin-bottom:.3rem}
+  .name{font-size:1.5rem;font-weight:800;margin:0 0 1.1rem;word-break:break-all}
+  .code{
+    font-size:3.6rem;font-weight:800;letter-spacing:.06em;
+    color:var(--red);line-height:1;margin:0 0 .55rem;
+  }
+  .tname{font-size:1.45rem;font-weight:800;margin:0 0 .15rem;line-height:1.3}
+  .tsub{font-size:1rem;color:var(--mute);margin:0 0 1rem}
+  .tdesc{font-size:1rem;margin:0}
+
+  .axis{border-top:1px solid var(--line);padding:.85rem 0}
+  .axis:first-of-type{border-top:none;padding-top:0}
+  .axis .k{font-size:.78rem;font-weight:800;color:var(--red);letter-spacing:.04em}
+  .axis .pick{font-size:1.02rem;font-weight:700;margin:.15rem 0 .2rem}
+  .axis .near{font-size:.92rem;color:var(--mute);line-height:1.55}
+
+  .closing{background:var(--box);padding:1.25rem;margin-bottom:1.4rem}
+  .closing p{margin:0 0 .7rem;font-size:.97rem}
+  .closing p:last-child{margin-bottom:0}
+  .closing strong{font-weight:800}
+
+  .shot{
+    border:1.5px solid var(--red);padding:1rem 1.1rem;
+    font-weight:800;font-size:1rem;color:var(--red);
+  }
+  .foot{margin-top:2.2rem;padding-top:.7rem;border-top:1px solid var(--line);
+        font-size:.78rem;color:var(--mute)}
+  .hidden{display:none}
+
+  @media (max-width:400px){
+    body{font-size:16px}
+    h1{font-size:1.8rem}
+    .code{font-size:3rem}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .screen{animation:in .18s ease-out}
+    @keyframes in{from{opacity:0}to{opacity:1}}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="masthead">
+    <span>나는 어떤 눈으로 이야기를 볼까?</span>
+    <span class="right">2주차</span>
+  </div>
+  <main id="stage"></main>
+  <div class="foot">디지털 스토리텔링과 플랫폼 · 문화콘텐츠융합전공</div>
+</div>
+
+<script>
+/* ══════════ 데이터 ══════════ */
+const AXES = [
+  {key:"문턱", pair:["N","J"]},
+  {key:"연결", pair:["L","C"]},
+  {key:"전달", pair:["V","S"]},
+  {key:"무게", pair:["P","D"]}
+];
+
+const NEAR = {
+  N:{pick:"뭔가 일어나면 이야기로 본다",
+     near:"애벗과 가깝습니다. 사건이 하나라도 있으면 이야기라고 보는 쪽이에요."},
+  J:{pick:"의미 있는 변화가 있어야 이야기다",
+     near:"맥키와 가깝습니다. 인물의 삶에서 무언가가 뒤집혀야 사건이라고 보는 쪽이에요."},
+  L:{pick:"이어지지 않아도 괜찮다",
+     near:"바르트, 리몬케넌과 가깝습니다. 사건이 둘 이상이면 충분하고, 이유까지는 요구하지 않는 쪽이에요."},
+  C:{pick:"이유로 이어져야 한다",
+     near:"미케 발, 보드웰과 가깝습니다. 사건들이 서로 이유로 묶여야 이야기라고 보는 쪽이에요."},
+  V:{pick:"말해주는 사람이 있어야 한다",
+     near:"전통적인 서사학 쪽입니다. 이야기는 누군가 전하는 것이고, 그래서 '목소리'가 필요하다고 봅니다."},
+  S:{pick:"보여주기만 해도 된다",
+     near:"영상 쪽 논의와 가깝습니다. 화자는 여러 장치 중 하나일 뿐, '보여주기'만으로도 이야기가 성립한다고 봅니다."},
+  P:{pick:"줄기가 이야기를 만든다",
+     near:"맥키와 가깝습니다. '방향'을 정하는 사건이 이야기를 만든다고 보는 쪽이에요."},
+  D:{pick:"곁가지가 이야기를 살린다",
+     near:"애벗과 가깝습니다. 꼭 필요하지 않은 사건이 의미와 감동에서는 더 중요할 수 있다고 봅니다."}
+};
+
+const TYPES = {
+  NLVD:["덕후형","뭐든 파고들 수 있는 사람","웬만한 건 다 이야기로 봅니다. 사건이 이어지지 않아도, 별일이 없어도 괜찮아요. 대신 누가 옆에서 도란도란 들려주면 훨씬 좋습니다."],
+  NLVP:["입담형","결국 말하는 사람이 중요하다","소재는 뭐든 상관없는데, 말해 주는 사람이 있어야 살아납니다. 이야기가 누구에 의해서 전달되어 어디로 가는지가 중요해요."],
+  NLSD:["잔잔형","아무 일 없어도 좋다","문턱이 가장 낮은 쪽입니다. 설명도 필요 없고 사건도 필요 없어요. 화면에 있는 걸 그대로 받아들이는 사람입니다."],
+  NLSP:["관망형","말없이 지켜보는 사람","설명은 필요 없다고 봅니다. 화면만 보고 알아채는 쪽이에요. 다만 지켜보면서도 결국 이야기가 어떻게 흐르는지가 중요해요."],
+  NCVD:["사연형","사정을 알아야 마음이 간다","앞뒤가 이어져야 합니다. 그 사정을 누가 말로 짚어주면 더 좋고요. 정작 오래 기억하게 되는 건 사건이 아니라 사소한 장면이지만요."],
+  NCVP:["총무형","정리가 되어야 편하다","이유가 분명하고, 누군가 정리해 주고, 방향이 뚜렷해야 마음이 놓입니다. 헷갈리게 만드는 이야기에 잘 화가 나는 편이에요."],
+  NCSD:["행간형","말 안 해도 다 안다","설명해 주면 오히려 김이 샙니다. 스스로도 할 수 있으니까요. 이야기 사이 빈틈에서 읽어 내는 쪽이고, 그 빈틈을 제일 아낍니다."],
+  NCSP:["설계형","어떻게 짜였는지가 보인다","보면서 구조가 보이는 사람입니다. 말로 설명해 주는 것보다 이야기의 짜임이 스스로 드러날 때 감탄해요."],
+  JLVD:["최애형","결국 남는 건 사람이다","이야기라면 인물에게 무언가 변화를 만들어야 하죠. 기억에 남는 건 사건이 아니라 그 인물입니다. 그 사람 목소리를 직접 듣고 싶어 해요."],
+  JLVP:["본론형","그래서 무슨 일이 있었는데","중요한 일이 일어나야 하고, 그게 뭔지 분명히 전해져야 합니다. 사건끼리 꼭 이어질 필요는 없다고 보고요."],
+  JLSD:["여운형","큰 장면보다 작은 장면","이야기의 조건은 까다롭게 보는데, 좋았던 기억은 보통 별것 아닌 장면에 있습니다. 그리고 그 장면엔 설명이 없었죠."],
+  JLSP:["직진형","보여주면 되지 왜 말을 해","뚜렷한 사건이 있어야 하고, 화면으로 드러나야 합니다. 나래이션이 깔리면 살짝 손발이 오그라든 적 있었나요?"],
+  JCVD:["왜형","이유부터 설명해 주세요","왜 그렇게 됐는지가 분명해야 하고, 그 이유를 인물 입으로 듣고 싶습니다. 그런데 정작 아끼는 장면은 아무 일도 안 일어나는 쪽일까요?"],
+  JCVP:["정석형","이야기는 이래야 한다","이야기에는 중요한 변화가 필요하고, 이유가 이어지고, 방향이 있고, 군더더기가 없어야 합니다. 가장 고전적인 시선이에요."],
+  JCSD:["빈칸형","안 보여준 게 더 궁금하다","조건은 엄격한데 읽는 방식은 느슨합니다. 안 알려  줘도 알아채고, 오히려 비어 있는 자리에서 더 많이 읽어내요."],
+  JCSP:["미니멀형","뺄 거 다 빼야 좋다","필요한 것만 남았을 때 가장 좋다고 느낍니다. 이유는 분명하고, 화면이 스스로 말하고, 쳐낼 건 쳐낸 상태요."]
+};
+
+const Q = [
+  { axis:0,
+    setup:"친구가 어제 있었던 일을 얘기합니다.",
+    quotes:[["가","나 어제 편의점 갔다가 우산 놓고 왔어."],
+            ["나","나 어제 편의점 갔다가 우산 놓고 왔는데, 그거 우리 엄마가 사  준 마지막 선물이었거든."]],
+    ask:"둘 중 하나만 이야기라고 부를 수 있다면?",
+    opts:[["‘가’도 충분히 이야기다","N"],
+          ["‘나’는 이야기지만 ‘가’는 그냥 있었던 일이다","J"]] },
+
+  { axis:0,
+    setup:"어떤 유튜브 영상을 트니 내용이 이렇습니다. 카페 뷰. 창밖을 30분간 비춥니다. 사람들이 지나가고, 비가 오기 시작하고, 그치고, 해가 집니다. 말이나 자막은 없습니다.",
+    quotes:[],
+    ask:"다 보고 나서 누가 “무슨 이야기였어?”라고 물으면?",
+    opts:[["대답할 게 있을 것 같다","N"],
+          ["딱히 이야기는 아니었다고 답할 것 같다","J"]] },
+
+  { axis:0,
+    setup:"누군가 이런 글을 올렸습니다.",
+    quotes:[["","오늘 아침에 늦잠 자서 지각했다. 점심은 김밥 먹었다. 퇴근길에 비 맞았다."]],
+    ask:"이건 이야기일까요?",
+    opts:[["짧지만 이야기다","N"],
+          ["이건 기록이지 이야기는 아니다","J"]] },
+
+  { axis:1,
+    setup:"어떤 드라마가 매 회차 서로 다른 인물의 하루를 보여 줍니다. 인물들끼리는 서로 모르고, 사건도 이어지지 않습니다. 배경이 같은 동네라는 것만 공통점입니다.",
+    quotes:[],
+    ask:"이 드라마를 어떻게 보시겠어요?",
+    opts:[["이것은 하나의 이야기다","L"],
+          ["이야기 여러 개를 묶어놓은 것이지, 하나의 이야기는 아니다","C"]] },
+
+  { axis:1,
+    setup:"영화를 보고 나왔는데 친구가 묻습니다. “근데 걔가 왜 갑자기 그런 선택을 한 거야?” 사실 여러분도 잘 모르겠습니다.",
+    quotes:[],
+    ask:"이 상황을 어떻게 생각하세요?",
+    opts:[["그럴 수도 있다. 사람은 원래 이유 없이 행동하기도 하니까","L"],
+          ["그건 만든 사람이 설명을 빠뜨린 거다","C"]] },
+
+  { axis:1,
+    setup:"두 문장을 비교해 보세요.",
+    quotes:[["가","그는 회사를 그만뒀다. 그는 제주도로 갔다."],
+            ["나","그는 회사를 그만뒀다. 그래서 제주도로 갔다."]],
+    ask:"더 이야기 같다고 느껴지는 쪽은?",
+    opts:[["둘 다 비슷하다. ‘가’도 이미 이야기다","L"],
+          ["‘나’가 확실히 이야기다. ‘가’는 아직 뭔가 빠져 있다","C"]] },
+
+  { axis:2,
+    setup:"같은 사건을 두 방식으로 나누어 봅시다.",
+    quotes:[["가","인물이 아무 말 없이 짐을 싸서 집을 나갑니다. 설명은 없습니다."],
+            ["나","인물이 아무 말 없이 짐을 싸서 집을 나갑니다. “그날 나는 다시는 돌아오지 않을 생각이었다.”라는 나래이션이 깔립니다."]],
+    ask:"어느 쪽이 더 잘 만들어졌다고 느끼세요?",
+    opts:[["‘가’. 설명이 없어야 내가 직접 느낄 수 있다","V"],
+          ["‘나’. 이렇게 짚어 줘야 이해하기 편하다","S"]] },
+
+  { axis:2,
+    setup:"사진 한 장을 봅니다. 빈 놀이터에 신발 한 짝이 떨어져 있습니다.",
+    quotes:[],
+    ask:"이 사진에 이야기가 있을까요?",
+    opts:[["아직 없다. 누가 무슨 일이 있었는지 말해  줘야 이야기가 된다","V"],
+          ["이미 있다. 보는 순간 뭔가 있었다는 걸 알 수 있다","S"]] },
+
+  { axis:2,
+    setup:"어떤 영상의 마지막에 자막이 뜹니다.",
+    quotes:[["","그 이후, 여자는 다시 고향으로 돌아오지 않았다."]],
+    ask:"이 자막을 어떻게 보세요?",
+    opts:[["이게 있어야 마무리가 된다","V"],
+          ["이런 건 없는 게 낫다. 화면으로 충분하다","S"]] },
+
+  { axis:3,
+    setup:"좋아하는 드라마를 친구에게 추천하면서 딱 한 장면만 보여줄 수 있습니다.",
+    quotes:[],
+    ask:"어떤 장면을 고르시겠어요?",
+    opts:[["이야기에서 가장 중요한 대목으로, 이 드라마가 뭘 하려는지 보여 주는 장면","P"],
+          ["별일은 없지만 중심 인물이 어떤 사람인지 드러나는 대사나 장면","D"]] },
+
+  { axis:3,
+    setup:"드라마 한 편을 열두 부작으로 만들 수 있는데, 방송사에서 여덟 부작으로 줄이자고 합니다. 큰 줄기는 그대로 두고 네 편 분량을 덜어내야 합니다.",
+    quotes:[],
+    ask:"어떻게 생각하세요?",
+    opts:[["그래도 괜찮다. 중요한 건 다 남으니까.","P"],
+          ["그러면 다른 드라마가 된다. 덜어낸 자리에 있던 게 아까울 것 같다.","D"]] },
+
+  { axis:3,
+    setup:"10분짜리 요약 영상으로 드라마 한 시즌을 봤습니다.",
+    quotes:[],
+    ask:"보고 난 느낌은?",
+    opts:[["볼만했다. 중요한 건 다 들어 있었다.","P"],
+          ["뭔가 허전했다. 본 것 같지가 않았다.","D"]] }
+];
+
+/* ══════════ 상태 ══════════ */
+let step = -1;                 // -1 = 이름 입력, 0..11 = 문항, 12 = 결과
+let uname = "";
+const picks = new Array(Q.length).fill(null);
+const stage = document.getElementById("stage");
+
+const esc = s => s.replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+/* ══════════ 화면 ══════════ */
+function render(){
+  if (step === -1) return renderStart();
+  if (step >= Q.length) return renderResult();
+  renderQuestion();
+}
+
+function renderStart(){
+  stage.innerHTML = `
+    <div class="screen">
+      <h1>나는 어떤 눈으로<br>이야기를 볼까?</h1>
+      <p class="sub">정답은 없습니다. 어느 쪽이 더 자기 같은지만 고르면 됩니다.</p>
+      <label class="fld" for="nm">이름을 적어 주세요</label>
+      <input type="text" id="nm" autocomplete="name" maxlength="20" value="${esc(uname)}" placeholder="예: 김지우">
+      <p class="hint">결과 화면에 이름이 함께 나옵니다. 그 화면을 캡처해서 제출하게 됩니다.</p>
+      <p class="warn" id="wn">이름을 적어야 시작할 수 있습니다.</p>
+      <div class="row"><button class="go" id="startBtn">시작하기</button></div>
+    </div>`;
+  const input = document.getElementById("nm");
+  const warn = document.getElementById("wn");
+  const start = () => {
+    const v = input.value.trim();
+    if (!v){ warn.classList.add("show"); input.focus(); return; }
+    uname = v; step = 0; render();
+  };
+  document.getElementById("startBtn").onclick = start;
+  input.addEventListener("keydown", e => { if (e.key === "Enter") start(); });
+  input.addEventListener("input", () => warn.classList.remove("show"));
+  input.focus();
+}
+
+function renderQuestion(){
+  const q = Q[step];
+  const ticks = Q.map((_, i) =>
+    `<i class="${i < step ? "on" : (i === step ? "now" : "")}"></i>`).join("");
+  const quotes = q.quotes.length
+    ? `<div class="quotes">${q.quotes.map(([tag, t]) =>
+        `<p>${tag ? `<b>${tag}</b>` : ""}${esc(t)}</p>`).join("")}</div>`
+    : "";
+  const opts = q.opts.map(([label, val], i) =>
+    `<button class="opt" data-v="${val}" aria-pressed="${picks[step] === val}">${esc(label)}</button>`
+  ).join("");
+
+  stage.innerHTML = `
+    <div class="screen">
+      <div class="ticks">${ticks}</div>
+      <div class="count">${step + 1} / ${Q.length}</div>
+      <p class="setup">${esc(q.setup)}</p>
+      ${quotes}
+      <p class="ask">${esc(q.ask)}</p>
+      <div class="opts">${opts}</div>
+      <div class="row"><button class="back" id="backBtn">이전</button></div>
+    </div>`;
+
+  stage.querySelectorAll("button.opt").forEach(b => {
+    b.onclick = () => {
+      picks[step] = b.dataset.v;
+      step++;
+      render();
+      window.scrollTo(0, 0);
+    };
+  });
+  document.getElementById("backBtn").onclick = () => {
+    step--; render(); window.scrollTo(0, 0);
+  };
+}
+
+function renderResult(){
+  const tally = {};
+  picks.forEach(v => { if (v) tally[v] = (tally[v] || 0) + 1; });
+  const code = AXES.map(a =>
+    (tally[a.pair[0]] || 0) >= (tally[a.pair[1]] || 0) ? a.pair[0] : a.pair[1]
+  ).join("");
+  const [tname, tsub, tdesc] = TYPES[code];
+
+  const rows = AXES.map((a, i) => {
+    const letter = code[i];
+    return `<div class="axis">
+      <div class="k">${a.key}</div>
+      <div class="pick">${NEAR[letter].pick}</div>
+      <div class="near">${NEAR[letter].near}</div>
+    </div>`;
+  }).join("");
+
+  stage.innerHTML = `
+    <div class="screen">
+      <div class="card">
+        <div class="who">응시자</div>
+        <p class="name">${esc(uname)}</p>
+        <p class="code">${code}</p>
+        <p class="tname">${tname}</p>
+        <p class="tsub">${tsub}</p>
+        <p class="tdesc">${tdesc}</p>
+      </div>
+
+      <div class="card">${rows}</div>
+
+      <div class="closing">
+        <p><strong>물론, 어느 쪽도 틀린 시선이 아닙니다.</strong></p>
+        <p>여기 나온 갈림길은 전부 100년 동안 학자들이 실제로 나뉘어 온 지점이니까요. 정답이 정해져 있었다면 애초에 갈리지도 않았겠죠.</p>
+      </div>
+
+      <div class="shot">이름이 보이도록 이 화면을 캡처해 구글 폼으로 제출해 주세요.</div>
+
+      <div class="row">
+        <button class="back" id="againBtn">다시 하기</button>
+      </div>
+    </div>`;
+
+  document.getElementById("againBtn").onclick = () => {
+    picks.fill(null); step = -1; render(); window.scrollTo(0, 0);
+  };
+  window.scrollTo(0, 0);
+}
+
+render();
+</script>
+</body>
+</html>
